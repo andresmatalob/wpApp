@@ -1,2 +1,12 @@
+# To ensure app dependencies are ported from your virtual environment/host machine into your container, run 'pip freeze > requirements.txt' in the terminal to overwrite this file
 django==4.1.5
 gunicorn==20.1.0
+python-dotenv==1.0.0
+dj_database_url==1.3.0
+choco==1.0.5
+chromedriver-binary==94.0.4606.61
+selenium==4.9.0
+splinter
+behave-django
+click
+psycopg2-binary
