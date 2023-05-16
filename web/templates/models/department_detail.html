@@ -1,0 +1,346 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="{% static 'web/home_css.css' %}">
+    
+        {% if title %}
+            <title>Django Web - {{ title }}</title>
+        {% else %}
+            <title>Web project Web</title>
+        {% endif %}
+    </head>
+    <style>
+        .hello-msg{
+            font-size: 18px;
+            color: azure;
+            margin-right: 20px;
+            justify-self: center;
+            align-self: center;
+        }
+        .button-56 {
+        align-items: center;
+        background-color: #fee6e3;
+        border: 2px solid #111;
+        border-radius: 8px;
+        box-sizing: border-box;
+        color: #111;
+        cursor: pointer;
+        display: flex;
+        font-family: Inter,sans-serif;
+        font-size: 16px;
+        height: 48px;
+        justify-content: center;
+        line-height: 24px;
+        max-width: 100%;
+        padding: 0 25px;
+        position: relative;
+        text-align: center;
+        text-decoration: none;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        }
+
+        .button-56:after {
+        background-color: #111;
+        border-radius: 8px;
+        content: "";
+        display: block;
+        height: 48px;
+        left: 0;
+        width: 100%;
+        position: absolute;
+        top: -2px;
+        transform: translate(8px, 8px);
+        transition: transform .2s ease-out;
+        z-index: -1;
+        }
+
+        .button-56:hover:after {
+        transform: translate(0, 0);
+        }
+
+        .button-56:active {
+        background-color: #ffdeda;
+        outline: 0;
+        }
+
+        .button-56:hover {
+        outline: 0;
+        }
+
+        @media (min-width: 768px) {
+            .button-56 {
+                padding: 0 40px;
+            }
+        }
+    </style>
+    
+    <body>
+        <header class="site-header">
+            <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+                <div class="container">
+                    <a class="navbar-brand mr-4" href="/">Basical</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarToggle">
+                        <div class="navbar-nav mr-auto">
+                            <a class="nav-item nav-link" href="/">Home</a>
+                            <a class="nav-item nav-link" href="/about">About</a>
+                        </div>
+                        <!-- Navbar Right Side -->
+                        <div class="navbar-nav">
+                            <span class="hello-msg">Hello, {{request.user}}</span>
+                            <a href="/logout">
+                                <button class="button-56" role="button">Logout</button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <div class="container">
+            <h1>Departament de {{ department.name }}</h1>
+            <h2>Users:</h2>
+            <ul>
+            {% for user in department.users.all %}
+                <li>{{ user.username }}</li>
+            {% empty %}
+                <p>No users found for this department.</p>
+            {% endfor %}
+            </ul>
+
+            <h1>Add worker to department of {{ department.name }}</h1>
+            
+            <ul class="list-group mt-3">
+                {% for user in company.workers.all %}
+                <li class="list-group-item">
+                    {{ user.username }} ({{ user.email }})
+                    <form method="POST" action="{% url 'add_user_to_department' department_id=department.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="username" value="{{ user.username }}">
+                        <button type="submit" class="btn btn-primary float-right">Add</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+            <h2>Projects:</h2>
+            <ul>
+                {% for project in department.projects.all %}
+                    <li>{{ project.name }}</li>
+                    {% if project.tasks.count > 0 %}
+                        {% for task in project.tasks.all %}
+                        <ul>
+                            <li>
+                                {{ task.name }}
+                                <button class="delete-task" data-task-id="{{ task.id }}">Done</button>
+                                <button class="modify-task" data-task-id="{{ task.id }}">Modify Task</button>
+                                <div class="modify-task-input" style="display: block;">
+                                  <input type="text" name="new-task-name" placeholder="Enter new task name">
+                                  <button class="save-modified-task" data-task-id="{{ task.id }}">Save</button>
+                                </div>
+                              </li>
+                        </ul>
+                        {% endfor %}
+                    {% else %}
+                        <p>No tasks found for this project.</p>
+                    {% endif %}
+                    <form class="add-task-form" data-project-id="{{ project.id }}">
+                        <input type="text" name="task-name" placeholder="Enter task name">
+                        <button type="submit">Add Task</button>
+                    </form>
+                    {% if request.user == project.admin %}
+                        <button class="delete-project" data-project-id="{{ project.id }}">Delete Project</button>
+                    {% endif %}
+                {% empty %}
+                    <p>No projects found for this department.</p>
+                {% endfor %}
+                {% block content %}
+                <h2>Create a New Project</h2>
+                <form class="add-project-form" data-department-id="{{ department.id }}">
+                    <input type="text" name="project-name" placeholder="Enter Project name">
+                    <input type="hidden" name="created_by" value="{{ request.user.id }}">
+                    <button type="submit">Add Project</button>
+                </form>
+                {% endblock %}
+                {% block script %}
+                <script>
+                    const deleteTaskButtons = document.querySelectorAll('.delete-task');
+                    deleteTaskButtons.forEach(button => {
+                        button.addEventListener('click', (event) => {
+                            event.preventDefault();
+                            const taskId = event.target.dataset.taskId;
+                            if (confirm('Are you sure you want to delete this task?')) {
+                                fetch(`/delete_task/${taskId}/`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': '{{ csrf_token }}',
+                                    },
+                                })
+                                    .then(response => {
+                                        if (response.ok) {
+                                            // Reload the page to show updated task list
+                                            location.reload();
+                                        } else {
+                                            alert('An error occurred while deleting the task.');
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.log(error);
+                                        alert('An error occurred while deleting the task.');
+                                    });
+                            }
+                        });
+                    });
+
+                    const deleteProjectButtons = document.querySelectorAll('.delete-project');
+                    deleteProjectButtons.forEach(button => {
+                        button.addEventListener('click', (event) => {
+                            event.preventDefault();
+                            const projectId = event.target.dataset.projectId;
+                            if (confirm('Are you sure you want to delete this project?')) {
+                                fetch(`/delete_project/${projectId}/`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': '{{ csrf_token }}',
+                                    },
+                                })
+                                    .then(response => {
+                                        if (response.ok) {
+                                            // Reload the page to show updated task list
+                                            location.reload();
+                                        } else {
+                                            alert('An error occurred while deleting the task.');
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.log(error);
+                                        alert('An error occurred while deleting the task.');
+                                    });
+                            }
+                        });
+                    });
+
+                    const addTaskForms = document.querySelectorAll('.add-task-form');
+                    addTaskForms.forEach(form => {
+                        form.addEventListener('submit', (event) => {
+                            event.preventDefault();
+                            const projectId = form.dataset.projectId;
+                            const taskNameInput = form.querySelector('[name="task-name"]');
+                            const taskName = taskNameInput.value;
+                            taskNameInput.value = '';
+                            fetch(`/add_task/${projectId}/`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': '{{ csrf_token }}',
+                                },
+                                body: JSON.stringify({
+                                    'name': taskName,
+                                }),
+                            })
+                                .then(response => {
+                                    if (response.ok) {
+                                        // Reload the page to show updated task list
+                                        location.reload();
+                                    } else {
+                                        alert('An error occurred while adding the task.');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.log(error);
+                                    alert('An error occurred while adding the task.');
+                                });
+                        });
+                    });
+                    const addProjectForms = document.querySelectorAll('.add-project-form');
+                    addProjectForms.forEach(form => {
+                        form.addEventListener('submit', (event) => {
+                            event.preventDefault();
+                            const departmentId = form.dataset.departmentId;
+                            const projectNameInput = form.querySelector('[name="project-name"]');
+                            const projectName = projectNameInput.value;
+                            projectNameInput.value = '';
+
+                            fetch(`/create_project/${departmentId}/`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': '{{ csrf_token }}',
+                                },
+                                body: JSON.stringify({
+                                    'name': projectName,
+                                }),
+                            })
+                                .then(response => {
+                                    if (response.ok) {
+                                        // Reload the page to show updated project list
+                                        location.reload();
+                                    } else {
+                                        alert('An error occurred while adding the project.');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.log(error);
+                                    alert('An error occurred while adding the project.');
+                                });
+                        });
+                    });
+                    const saveModifiedTaskButtons = document.querySelectorAll('.save-modified-task');
+                    saveModifiedTaskButtons.forEach(button => {
+                        button.addEventListener('click', (event) => {
+                            event.preventDefault();
+                            const taskId = event.target.dataset.taskId;
+                            const newTaskName = event.target.parentElement.querySelector('[name="new-task-name"]').value;
+
+                            // Check if the new task name is not empty
+                            if (newTaskName.trim() !== '') {
+                                fetch(`/modify_task/${taskId}/`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': '{{ csrf_token }}',
+                                    },
+                                    body: JSON.stringify({
+                                        'name': newTaskName,
+                                    }),
+                                })
+                                    .then(response => {
+                                        if (response.ok) {
+                                            // Reload the page to show updated task list
+                                            location.reload();
+                                        } else {
+                                            alert('An error occurred while modifying the task.');
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.log(error);
+                                        alert('An error occurred while modifying the task.');
+                                    });
+                            } else {
+                                alert('Please enter a task name.');
+                            }
+                        });
+                    });
+
+                </script>
+                {% endblock %}
+            </ul>
+        </div>
+            <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    </body>
+</html>

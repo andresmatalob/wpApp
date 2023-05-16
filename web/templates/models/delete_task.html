@@ -1,0 +1,10 @@
+
+{% block content %}
+    <h1>Delete Task</h1>
+    <p>Are you sure you want to delete this task?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Yes, delete it</button>
+        <a href="{% url 'department-detail' department_id=task.project.department.id %}">No, cancel</a>
+    </form>
+{% endblock %}

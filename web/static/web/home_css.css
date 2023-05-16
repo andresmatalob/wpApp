@@ -1,0 +1,29 @@
+body {
+background: #fafafa;
+color: #333333;
+margin-top: 5rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+color: #2c2c2c;
+}
+
+ul {
+margin: 0;
+}
+
+.bg-steel {
+background-color: #333333;
+}
+
+.site-header .navbar-nav .nav-link {
+color: #cccccc;
+}
+
+.site-header .navbar-nav .nav-link:hover {
+color: #ffffff;
+}
+
+.site-header .navbar-nav .nav-link.active {
+font-weight: 500;
+}

@@ -1,0 +1,7 @@
+<h2>Add User to {{ company.name }}</h2>
+  <form method="post">
+    {% csrf_token %}
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username">
+    <button type="submit">Add User</button>
+  </form>

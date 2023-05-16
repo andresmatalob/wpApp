@@ -1,0 +1,15 @@
+app = "wpApp"
+
+kill_signal = "SIGINT"
+kill_timeout = 5
+
+[[services]]
+  internal_port = 8000
+  protocol = "tcp"
+
+  [services.concurrency]
+    hard_limit = 10
+    soft_limit = 5
+
+  [[services.ports]]
+    handlers = ["http"]
